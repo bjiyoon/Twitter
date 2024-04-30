@@ -2,7 +2,7 @@ let users = [
     {
         id: '1',
         username: 'apple',
-        password: '1111',
+        password: '$2b$10$hA2t2amVzMSZ4c5EbSgOH.WYWEZnAEvJoZ5xMU0x/pxV9xVNKl1mu',
         name: '김사과',
         email: 'apple@apple.com',
         url: 'https://www.logoyogo.com/web/wp-content/uploads/edd/2021/02/logoyogo-1-45.jpg'
