@@ -1,11 +1,12 @@
 import * as authRepository from '../data/auth.js';
 import * as bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import { config } from "../config.js";
 
 
-const secretKey = "abcd1234%^&*";
-const jwtExpiresInDays = '2d';
-const bcyptSaltRounds = 10;
+// const secretKey = "abcd1234%^&*";
+// const jwtExpiresInDays = '2d';
+// const bcyptSaltRounds = 10;
 
 // async function makeToken(id) {
 //     const token = jwt.sign({
@@ -17,7 +18,7 @@ const bcyptSaltRounds = 10;
 // }
 
 function createJwtToken(id) {
-    return jwt.sign({id}, secretKey, {expiresIn: jwtExpiresInDays});
+    return jwt.sign({id}, config.jwt.secretkey, {expiresIn: config.jwt.expiresInSec});
 }
 
 export async function signup(req, res, next) {
@@ -27,7 +28,7 @@ export async function signup(req, res, next) {
         return res.status(409).json({message:`${username}이 이미 있습니다.`})
     }
 
-    const hashed = await bcrypt.hash(password, bcyptSaltRounds);
+    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
     const userId = await authRepository.createUser({username, hashed, name, email, url}); //중괄호를 넣으면 요거 자체를 객체로 받을 수 있음
     const token = createJwtToken(userId);
     res.status(201).json({token, username});
