@@ -1,7 +1,8 @@
 import * as tweetRepository from '../data/tweet.js';
+import { isAuth } from '../middleware/auth.js';
 
 // 여러 트윗을 가져오는 함수 
-export async function getTweets(req, res) {
+export async function getTweets(req, res, next) {
     const username = req.query.username;
     const data = await (username ? tweetRepository.getAllByUsername(username)
             : tweetRepository.getAll());

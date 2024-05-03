@@ -3,47 +3,64 @@ import * as bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
 
-const secret = "abcd1234%^&*";
-async function makeToken(id) {
-    const token = jwt.sign({
-        id: id,
-        isAdmin: false
-    },
-    secret, {expiresIn: '1h'})
-    return token;
+const secretKey = "abcd1234%^&*";
+const jwtExpiresInDays = '2d';
+const bcyptSaltRounds = 10;
+
+// async function makeToken(id) {
+//     const token = jwt.sign({
+//         id: id,
+//         isAdmin: false
+//     },
+//     secret, {expiresIn: '1h'})
+//     return token;
+// }
+
+function createJwtToken(id) {
+    return jwt.sign({id}, secretKey, {expiresIn: jwtExpiresInDays});
 }
 
 export async function signup(req, res, next) {
-    const {username, password, name, email} = req.body;
-    const hashed = bcrypt.hashSync(password, 10);
-    const users = await authRepository.createUser(username, hashed, name, email);
-    if (users) {
-        res.status(201).json(users);
+    const {username, password, name, email, url} = req.body;
+    const found = await authRepository.findByUsername(username);
+    if (found) {
+        return res.status(409).json({message:`${username}이 이미 있습니다.`})
     }
-}
 
+    const hashed = await bcrypt.hash(password, bcyptSaltRounds);
+    const userId = await authRepository.createUser({username, hashed, name, email, url}); //중괄호를 넣으면 요거 자체를 객체로 받을 수 있음
+    const token = createJwtToken(userId);
+    res.status(201).json({token, username});
+}
+ 
 export async function login(req, res, next) {
     const {username, password} = req.body;
-    const user = await authRepository.login(username);
-    // const passwd = await bcrypt.hashSync(authRepository.login(password), 10);
-    if (user) {
-        const isValidPassword = await bcrypt.compare(password, user.password); // 비밀번호 확인
-        if (isValidPassword) {
-            res.status(201).header('Token', makeToken(username)).json(`${username} 로그인 완료`);
-        }
-        else {
-            res.status(404).json({message: `${username}님 아이디 또는 비밀번호 확인하세요.`})
-        }
+    // const user = await authRepository.login(username);
+    const user = await authRepository.findByUsername(username);
+    if (!user) {
+        return res.status(401).json({message: `아이디를 찾을 수 없음`});
     }
-    else {
-        res.status(404).json({ message: `${username}님 아이디가 존재하지 않습니다.` });
+    const isValidPassword = await bcrypt.compareSync(password, user.password);
+    if (!isValidPassword) {
+        return res.status(401).json({message: `아이디 또는 비밀번호 오류`});
     }
+    const token = createJwtToken(user.id);
+    res.status(200).json({token, username});
 }
 
-export async function verify(req, res, next) {
-    // 토큰이 유효한지 확인해주는 기능
-    const token = req.header['Token'];
-    if (token) {
-        res.status(200).json(token);
+// export async function verify(req, res, next) {
+//     // 토큰이 유효한지 확인해주는 기능
+//     const token = req.header['Token'];
+//     if (token) {
+//         res.status(200).json(token);
+//     }
+// }
+
+export async function me(req, res, next) {
+    const user = await authRepository.findById(req.userId);
+    if (!user) {
+        return res.status(404).json({message: `일치하는 사용자가 없음`});
+
     }
+    res.status(200).json({token: req.token, username: user.username});
 }
