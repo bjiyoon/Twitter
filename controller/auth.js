@@ -3,11 +3,6 @@ import * as bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { config } from "../config.js";
 
-
-// const secretKey = "abcd1234%^&*";
-// const jwtExpiresInDays = '2d';
-// const bcyptSaltRounds = 10;
-
 // async function makeToken(id) {
 //     const token = jwt.sign({
 //         id: id,
@@ -41,7 +36,7 @@ export async function login(req, res, next) {
     if (!user) {
         return res.status(401).json({message: `아이디를 찾을 수 없음`});
     }
-    const isValidPassword = await bcrypt.compareSync(password, user.password);
+    const isValidPassword = await bcrypt.compareSync(password, user[0][0].password);
     if (!isValidPassword) {
         return res.status(401).json({message: `아이디 또는 비밀번호 오류`});
     }
