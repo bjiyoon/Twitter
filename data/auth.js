@@ -1,25 +1,50 @@
-import { db } from '../db/database.js';
+import SQ, { DATE } from 'sequelize';
+import { sequelize } from '../db/database.js';
+const DataTypes = SQ.DataTypes; // SQ 데이터 형을 가져와서 넣어줌(INTEGER, STRING 등등)
+
+export const User = sequelize.define(
+    'user', 
+    //데이터 테이블이 존재하지 않는다면 만들고 시작
+    //ORM은 테이블 생성하면 자동으로 s를 붙여줌
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            allowNull: false,
+            primarykey: true
+        },
+        username: {
+            type: DataTypes.STRING(50),
+            allowNull: false
+        },
+        password: {
+            type: DataTypes.STRING(150),
+            allowNull: false
+        },
+        name: {
+            type: DataTypes.STRING(50),
+            allowNull: false
+        },
+        email: {
+            tyle: DataTypes.STRING(50),
+            allowNull: false
+        },
+        url: DataTypes.STRING(1000)
+    },
+    { timestamps: false }
+);
+
 // 아이디(username) 중복검사
-export async function findByUsername(username){
-    return db.execute('select * from users where username = ?', [username]).then((result) => {
-        console.log(result);
-        return result[0][0];
-    });
+export async function findByUsername(username){ 
+    return User.findOne({where: {username}}); // 데이터를 한 개만 찾아옴. 여러 개면 제일 처음 녀석으로
 }
 // id 중복검사
 export async function findById(id){
-    return db.execute('select * from users where id = ?', [id]).then((result) => {
-        console.log(result);
-        return result[0][0];
-    });
+    return User.findByPk(id); // pk로 찾는다
 }
+
 export async function createUser(user){
-    console.log(user);
-    const {username, hashed, name, email, url} = user;
-    return db.execute('insert into users (username, password, name, email, url) values (?, ?, ?, ?, ?)', [username, hashed, name, email, url]).then((result) => {
-        console.log(result);    // result[0].insertId
-        return result[0].insertId;
-    });
+    return User.create(user).then((date) => data.dataValues.id)
 }
 // export async function login(username){
 //     const user = users.find((user) => user.username === username)

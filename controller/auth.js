@@ -17,14 +17,14 @@ function createJwtToken(id) {
 }
 
 export async function signup(req, res, next) {
-    const {username, password, name, email, url} = req.body;
+    let {username, password, name, email, url} = req.body;
     const found = await authRepository.findByUsername(username);
     if (found) {
         return res.status(409).json({message:`${username}이 이미 있습니다.`})
     }
 
-    const hashed = await bcrypt.hash(password, config.bcrypt.saltRounds);
-    const userId = await authRepository.createUser({username, hashed, name, email, url}); //중괄호를 넣으면 요거 자체를 객체로 받을 수 있음
+    password = await bcrypt.hash(password, config.bcrypt.saltRounds);
+    const userId = await authRepository.createUser({username, password, name, email, url}); //중괄호를 넣으면 요거 자체를 객체로 받을 수 있음
     const token = createJwtToken(userId);
     res.status(201).json({token, username});
 }
