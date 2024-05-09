@@ -7,7 +7,7 @@ const ObjectID = MongoDB.ObjectId;
 
 // // 모든 트윗을 리턴
 export async function getAll() {
-    return getTweets().find().sort({createdAt:-1}).toArray().then(mapTweets);
+    return getTweets().find().sort({createdAt:-1}).toArray().then(mapTweets); // -1 = DESC
 };
 
 // 해당 아이디에 대한 트윗을 리턴

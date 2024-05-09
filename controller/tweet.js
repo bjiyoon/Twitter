@@ -1,4 +1,5 @@
 import * as tweetRepository from '../data/tweet.js';
+// import { getTweets } from '../db/database.js';
 
 // 여러 트윗을 가져오는 함수
 export async function getTweets(req, res){

@@ -15,13 +15,14 @@ const validateTweet = [
 // 해당 아이디에 대한 트윗 가져오기
 // GET
 // http://localhost:8080/tweets?username=:username
+
 router.get('/', isAuth, tweetController.getTweets); // isAuth 걸어줌으로써 인증 거쳐가게
 
 // 글번호에 대한 트윗 가져오기
 // GET
 // http://localhost:8080/tweets/:id
 
-router.post('/', isAuth, tweetController.getTweet);
+router.get('/:id', isAuth, tweetController.getTweet);
 
 // 트윗하기
 // POST
@@ -38,12 +39,12 @@ router.post('/', validateTweet, isAuth, tweetController.createTweet);
 // id, username, text
 // json 형태로 입력 후 변경된 데이터까지 모두 json으로 출력
 
-router.post('/', validateTweet, isAuth, tweetController.updateTweet);
+router.put('/:id', validateTweet, isAuth, tweetController.updateTweet);
 
 // 트윗 삭제하기
 // DELETE
 // http://localhost:8080/tweets/:id
 
-router.post('/', isAuth, tweetController.deleteTweet);
+router.delete('/:id', isAuth, tweetController.deleteTweet);
 
 export default router;

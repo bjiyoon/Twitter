@@ -1,5 +1,5 @@
 import express from 'express';
-import { body } from 'express-validator'
+import { body } from 'express-validator' //문자열 유효성 검사
 import * as authController from '../controller/auth.js';
 import { validate } from '../middleware/validator.js';
 import { isAuth } from '../middleware/auth.js';
