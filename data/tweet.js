@@ -1,43 +1,66 @@
 import { getTweets, getUsers } from '../db/database.js';
 import MongoDB, { ReturnDocument } from 'mongodb';
 import * as authRepository from './auth.js';
+import Mongoose from 'mongoose';
+import { useVirtualId } from '../db/database.js';
+
+const tweetSchema = new Mongoose.Schema({
+    text: {type: String, require: true},
+    userId: {type: String, require: true},
+    username: {type: String, require: true}, // require: 무조건 집어넣어야되냐
+    name: {type: String, require: true},
+    url: String
+}, {timestamps: true})
 
 
-const ObjectID = MongoDB.ObjectId; 
+useVirtualId(tweetSchema);
+const Tweet = Mongoose.model('tweet', tweetSchema); //컬렉션 생성
+
+
+// const ObjectID = MongoDB.ObjectId; 
 
 // // 모든 트윗을 리턴
 export async function getAll() {
-    return getTweets().find().sort({createdAt:-1}).toArray().then(mapTweets); // -1 = DESC
+    return Tweet.find().sort({createdAt: -1});
+    // return getTweets().find().sort({createdAt:-1}).toArray().then(mapTweets); // -1 = DESC
 };
 
 // 해당 아이디에 대한 트윗을 리턴
 export async function getAllByUsername(username){
-    return getTweets().find({username}).sort({createdAt:-1}).toArray().then(mapTweets);
+    return Tweet.find({username}).sort({createdAt: -1});
+    // return getTweets().find({username}).sort({createdAt:-1}).toArray().then(mapTweets);
 }
 
 // 글번호에 대한 트윗을 리턴
 export async function getById(id){
-    return getTweets().find({_id: new ObjectID(id)}).next().then(mapOptionalTweet);
+    return Tweet.findById(id);
+    // return getTweets().find({_id: new ObjectID(id)}).next().then(mapOptionalTweet);
 }
 
 // 트윗을 작성
 export async function create(text, userId){
-    return authRepository.findById(userId).then((user) => getTweets().insertOne({
-        text,
-        userId,
-        username: user.username,
-        url: user.url
-    })).then((result) => getById(result.insertedId)).then(mapOptionalTweet);
+    return authRepository.findById(userId).then((user) => new Tweet({
+        text, userId, name: user.name, username: user.username, url: user.url
+    }).save());
+
+    // return authRepository.findById(userId).then((user) => getTweets().insertOne({
+    //     text,
+    //     userId,
+    //     username: user.username,
+    //     url: user.url
+    // })).then((result) => getById(result.insertedId)).then(mapOptionalTweet);
 }
 
 // 트윗을 변경
 export async function update(id, text){
-    return getTweets().findOneAndUpdate({_id: new ObjectID(id)}, {$set: {text}}, {returnDocument:'after'}).then((result) => result).then(mapOptionalTweet);
+    return Tweet.findByIdAndUpdate(id, {text}, {returnDocument: "after"}); // 업데이트후 받은내용으로 리턴
+    // return getTweets().findOneAndUpdate({_id: new ObjectID(id)}, {$set: {text}}, {returnDocument:'after'}).then((result) => result).then(mapOptionalTweet);
 }
 
 // 트윗을 삭제
 export async function remove(id){
-    return getTweets().deleteOne({_id: new ObjectID(id)});
+    return Tweet.findByIdAndDelete(id);
+    // return getTweets().deleteOne({_id: new ObjectID(id)});
 }
 
 

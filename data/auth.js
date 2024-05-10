@@ -1,22 +1,38 @@
-import MongoDB from 'mongodb';
-import { getUsers } from '../db/database.js';
+// import MongoDB from 'mongodb';
+import Mongoose from 'mongoose';
+import { useVirtualId } from '../db/database.js';
 
-const ObjectID = MongoDB.ObjectId; 
+const userSchema = new Mongoose.Schema({
+    username: {type: String, require: true}, // require: 무조건 집어넣어야되냐
+    name: {type: String, require: true},
+    email: {type: String, require: true},
+    password:  {type: String, require: true},
+    url: String
+})
+
+useVirtualId(userSchema);
+
+const User = Mongoose.model('User', userSchema); //컬렉션 생성
+
+// const ObjectID = MongoDB.ObjectId; 
 //데이터를 저장할 떄 BSON으로 저장..형태는 JSON이랑 똑같이 생김
 //ObjectId : 테이블 개념이 따로 없으므로 동일한 데이터를 구분할 방법이 없어서 고유한 ID를 부여해주는 거라 보면 됨
 
 // 아이디(username) 중복검사
 export async function findByUsername(username){ 
-    return getUsers().find({username}).next().then(mapOptionalUser);
+    return User.findOne({username})
+    // return getUsers().find({username}).next().then(mapOptionalUser);
 }
 
 // id 중복검사
 export async function findById(id){
-    return getUsers().find({_id: new ObjectID(id)}).next().then(mapOptionalUser); // 몽고디비 objectid 형으로 바꿈
+    return User.findById(id)
+    // return getUsers().find({_id: new ObjectID(id)}).next().then(mapOptionalUser); // 몽고디비 objectid 형으로 바꿈
 }
 
 export async function createUser(user){
-    return getUsers().insertOne(user).then((result) => console.log(result.insertedId.toString()));
+    return new User(user).save().then((data) => data.id) //유저객체를 사용. 데이터가 추가됨 그리고 save()
+    // return getUsers().insertOne(user).then((result) => console.log(result.insertedId.toString()));
 }
 
 // export async function login(username){

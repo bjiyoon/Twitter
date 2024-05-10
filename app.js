@@ -19,7 +19,9 @@ app.use((req, res, next) => {
 
 //DB연결테스트 
 connectDB().then((db) => {
-    console.log('몽고DB 연결 성공')
+    console.log('몽구스를 사용하여 몽고DB 연결 성공')
     app.listen(config.host.port);
     console.log('port5000 ok')
 }).catch(console.error);
+
+// app.listen(config.host.port);
