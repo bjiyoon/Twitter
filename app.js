@@ -4,6 +4,8 @@ import tweetsRouter from './router/tweets.js'
 import authRouter from './router/auth.js'
 import { config } from './config.js';
 import { connectDB } from './db/database.js';
+import { initSocket } from './connection/socket.js';
+
 
 
 const app = express();
@@ -17,11 +19,13 @@ app.use((req, res, next) => {
     res.sendStatus(404);
 });
 
+// const server = app.listen(config.host.port);
+// initSocket(server);
+
 //DB연결테스트 
 connectDB().then((db) => {
     console.log('몽구스를 사용하여 몽고DB 연결 성공')
-    app.listen(config.host.port);
-    console.log('port5000 ok')
+    const server = app.listen(config.host.port);
+    initSocket(server);
 }).catch(console.error);
 
-// app.listen(config.host.port);

@@ -6,7 +6,7 @@ import { config } from "../config.js";
 // async function makeToken(id) {
 //     const token = jwt.sign({
 //         id: id,
-//         isAdmin: false
+//         isAdmin: false 
 //     },
 //     secret, {expiresIn: '1h'})
 //     return token;
